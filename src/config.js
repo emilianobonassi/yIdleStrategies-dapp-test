@@ -1,8 +1,9 @@
 // Main config file for common parameters
 export default Object.freeze({
-    TITLE: "yVault",
-    LOGO: "💤🌖",
-    VAULT_ADDR: "0xCA6C9fB742071044247298Ea0dBd60b77586e1E8",
-    WANT_ADDR: "0xA8e7AD77C60eE6f30BaC54E2E7c0617Bd7B5A03E",
-    WANT_SYMBOL: "zLOT",
+    TITLE: "yIdleStrategies",
+    LOGO: "🏆",
+    VAULT_ADDR: "0x33Bd0F9618Cf38FeA8f7f01E1514AB63b9bDe64b",
+    WANT_ADDR: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    WANT_SYMBOL: "USDC",
+    COINGECKO_SYMBOL: "usd-coin",
 })

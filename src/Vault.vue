@@ -5,12 +5,12 @@
       a(:href="'https://etherscan.io/address/' + config.VAULT_ADDR + '#code'" target='_blank') {{ config.VAULT_ADDR }}
     div Version: {{ vault_version }}
     div {{ config.WANT_SYMBOL }} price (CoinGecko 🦎): {{ want_price | toCurrency(4) }}
-    div Deposit Limit: {{ vault_deposit_limit | fromWei(2) }}
-    div Total Assets: {{ vault_total_assets | fromWei(2) }}
-    div Total AUM: {{ vault_total_aum | toCurrency(2) }}
+    div Deposit Limit: {{ vault_deposit_limit | fromWei6(2) }}
+    div Total Assets: {{ vault_total_assets | fromWei6(2) }}
+    div Total AUM: {{ vault_total_aum | fromWei6(2) }}
     p
     div Price Per Share: {{ vault_price_per_share | fromWei(8) }}
-    div Available limit: {{ vault_available_limit | fromWei(2) }} {{ config.WANT_SYMBOL }}
+    div Available limit: {{ vault_available_limit | fromWei6(2) }} {{ config.WANT_SYMBOL }}
     div(v-for="(strategy, index) in strategies")
       h2 <strong>Strategies</strong>
       div <strong> Strat. {{ index }}: </strong> {{ strategy.name }}
@@ -19,7 +19,7 @@
     h2 <strong>Wallet</strong>
     div Your Account: <strong>{{ username || activeAccount }}</strong>
     div Your Vault shares: {{ yvtoken_balance | fromWei(2) }}
-    div Your {{ config.WANT_SYMBOL }} Balance: {{ want_balance | fromWei(2) }}
+    div Your {{ config.WANT_SYMBOL }} Balance: {{ want_balance | fromWei6(2) }}
     div Your ETH Balance: {{ eth_balance | fromWei(2) }}
     p
     div(v-if="is_guest || yfi_needed <= 0")
@@ -35,22 +35,17 @@
       button(:disabled='!has_want_balance', @click.prevent='on_withdraw_all') 💸 Withdraw All
     div(v-else)
       div.red
-        span ⛔ You need {{ yfi_needed | fromWei(4)}} YFI more to enter the Citadel ⛔
-      <div v-konami @konami="bribe_unlocked = !bribe_unlocked"></div>
-      div(v-if="bribe_unlocked")
-        span If you still want to join the party...
-        | 
-        button(v-if="has_allowance_bribe" @click.prevent='on_bribe_the_bouncer') 💰 Bribe the bouncer with ({{ bribe_cost | fromWei(3) }} YFI)
-        button(v-if="!has_allowance_bribe" @click.prevent='on_approve_bribe') 🚀 Approve Bribe
-      div(v-else)
-        span Remember Konami 🎮
+        span ⛔ You are not authorized ⛔
     div.red(v-if="error")
       span {{ error }}
     p
       div.muted
-        span Made with 💙  
-        span yVault:
+        span Made with 💙 
+        span yIdleStrategies:
         | 
+        a(href='https://twitter.com/emilianobonassi' target='_blank') Emiliano
+        span  - yVault:
+        |
         a(href='https://twitter.com/macarse' target='_blank') Macarse
         span  - Guest List:
         | 
@@ -85,8 +80,6 @@ const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ERROR_NEGATIVE = "You have to deposit a positive number of tokens 🐀"
 const ERROR_NEGATIVE_ALL = "You don't have tokens to deposit 🐀"
 const ERROR_NEGATIVE_WITHDRAW = "You don't have any vault shares"
-const ERROR_GUEST_LIMIT = "That would exceed your guest limit. Try less."
-const ERROR_GUEST_LIMIT_ALL = "That would exceed your guest limit. Try not doing all in."
 
 
 export default {
@@ -128,6 +121,16 @@ export default {
       if (data === 'loading') return data
       if (data > 2**255) return '♾️'
       let value = ethers.utils.commify(ethers.utils.formatUnits(data, 15))
+      let parts = value.split('.')
+
+      if (precision === 0) return parts[0]
+
+      return parts[0] + '.' + parts[1].slice(0, precision)
+    },
+    fromWei6(data, precision) {
+      if (data === 'loading') return data
+      if (data > 2**255) return '♾️'
+      let value = ethers.utils.commify(ethers.utils.formatUnits(data, 6))
       let parts = value.split('.')
 
       if (precision === 0) return parts[0]
@@ -303,9 +306,9 @@ export default {
   },
   async created() {
 
-    axios.get('https://api.coingecko.com/api/v3/simple/price?ids=' + config.WANT_SYMBOL.toLowerCase() + '&vs_currencies=usd')
+    axios.get('https://api.coingecko.com/api/v3/simple/price?ids=' + config.COINGECKO_SYMBOL.toLowerCase() + '&vs_currencies=usd')
       .then(response => {
-        this.want_price = response.data[config.WANT_SYMBOL.toLowerCase()].usd
+        this.want_price = response.data[config.COINGECKO_SYMBOL.toLowerCase()].usd
       })
 
     //Active account is defined?
@@ -323,32 +326,11 @@ export default {
       } else {
         this.contractGuestList = new web3.eth.Contract(GuestList, response)
 
-        this.contractGuestList.methods.guests(this.activeAccount).call().then( response => {
+        this.contractGuestList.methods.authorized(this.activeAccount, 0).call().then( response => {
           this.is_guest = response
         })
       }
-
-      this.contractGuestList.methods.total_yfi(this.activeAccount).call().then( response => {
-        console.log("Total YFI: " + response.toString())
-        this.total_yfi = new ethers.BigNumber.from(response.toString())
-      })
-      
-      Vault.methods.activation().call().then( vault_activation => {
-        this.contractGuestList.methods.entrance_cost(vault_activation).call().then( response => {
-          console.log("Entrance cost: " + response.toString())
-          this.entrance_cost = new ethers.BigNumber.from(response.toString())
-        })
-      })
-
-      this.contractGuestList.methods.bribe_cost().call().then( response => {
-        console.log("Bribe cost: " + response.toString())
-        this.bribe_cost = new ethers.BigNumber.from(response.toString())
-      })
-
     })
-
-    // Iterate through strats
-
 
   },
 
