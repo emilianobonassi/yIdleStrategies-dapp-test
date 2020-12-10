@@ -35,7 +35,7 @@
       button(:disabled='!has_want_balance', @click.prevent='on_withdraw_all') 💸 Withdraw All
     div(v-else)
       div.red
-        span ⛔ You are not authorized ⛔
+        span 🚷 You are not authorized 🚷
     div.red(v-if="error")
       span {{ error }}
     p
