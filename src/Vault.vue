@@ -9,7 +9,7 @@
     div Total Assets: {{ vault_total_assets | fromWei6(2) }}
     div Total AUM: {{ vault_total_aum | fromWei6(2) }}
     p
-    div Price Per Share: {{ vault_price_per_share | fromWei(8) }}
+    div Price Per Share: {{ vault_price_per_share | fromWei6(8) }}
     div Available limit: {{ vault_available_limit | fromWei6(2) }} {{ config.WANT_SYMBOL }}
     div(v-for="(strategy, index) in strategies")
       h2 <strong>Strategies</strong>
