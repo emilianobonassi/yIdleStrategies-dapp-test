@@ -18,7 +18,7 @@
         a(:href="'https://etherscan.io/address/' + strategy.address + '#code'", target="_blank") {{ strategy.address }}
     h2 <strong>Wallet</strong>
     div Your Account: <strong>{{ username || activeAccount }}</strong>
-    div Your Vault shares: {{ yvtoken_balance | fromWei(2) }}
+    div Your Vault shares: {{ yvtoken_balance | fromWei6(2) }}
     div Your {{ config.WANT_SYMBOL }} Balance: {{ want_balance | fromWei6(2) }}
     div Your ETH Balance: {{ eth_balance | fromWei(2) }}
     p
