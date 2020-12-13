@@ -32,7 +32,7 @@
       button(v-if="vault_available_limit > 0" :disabled='has_allowance_vault', @click.prevent='on_approve_vault') {{ has_allowance_vault ? '✅ Approved' : '🚀 Approve Vault' }}
       button(v-if="vault_available_limit > 0" :disabled='!has_allowance_vault', @click.prevent='on_deposit') 🏦 Deposit
       button(v-if="vault_available_limit > 0" :disabled='!has_allowance_vault', @click.prevent='on_deposit_all') 🏦 Deposit All
-      button(:disabled='!has_want_balance', @click.prevent='on_withdraw_all') 💸 Withdraw All
+      button(@click.prevent='on_withdraw_all') 💸 Withdraw All
     div(v-else)
       div.red
         span 🚷 You are not authorized 🚷
